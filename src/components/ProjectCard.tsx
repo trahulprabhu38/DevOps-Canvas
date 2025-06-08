@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Github } from 'lucide-react';
+import { ExternalLink, Github, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Project } from '@/data/mockData';
@@ -94,6 +94,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
               >
                 <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
+            {project.mediumUrl && (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white hover:bg-gray-700/50 transition-all duration-200"
+              >
+                <a href={project.mediumUrl} target="_blank" rel="noopener noreferrer">
+                  <BookOpen className="h-4 w-4" />
                 </a>
               </Button>
             )}

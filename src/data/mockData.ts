@@ -1,4 +1,3 @@
-
 export interface Project {
   id: string;
   name: string;
@@ -6,6 +5,7 @@ export interface Project {
   tags: string[];
   githubUrl?: string;
   demoUrl?: string;
+  mediumUrl?: string;
   imageUrl: string;
   detailedDescription: string;
   features: string[];
@@ -23,6 +23,7 @@ export const mockProjects: Project[] = [
     tags: ['Kubernetes', 'Docker', 'Jenkins', 'ArgoCD', 'Microservices'],
     githubUrl: 'https://github.com/johndoe/k8s-microservices',
     demoUrl: 'https://demo.k8s-platform.com',
+    mediumUrl: 'https://medium.com/@johndoe/kubernetes-microservices-guide',
     imageUrl: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&h=600&fit=crop',
     detailedDescription: 'A comprehensive microservices platform built with modern DevOps practices. This project demonstrates enterprise-level architecture patterns and automation.',
     features: [

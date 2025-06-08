@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Github, ExternalLink, Filter } from 'lucide-react';
@@ -6,17 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import ProjectCard from '@/components/ProjectCard';
-import { mockProjects, Project } from '@/data/mockData';
+import { useProjects } from '@/hooks/useProjects';
+import { mapApiProjectToProject } from '@/utils/projectMapper';
+import { Project } from '@/data/mockData';
 
 const Index = () => {
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>(mockProjects);
+  const { data: apiProjects, isLoading, error } = useProjects();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [displayText, setDisplayText] = useState('');
   
   const fullText = "DevOps Engineer & Full-Stack Developer";
   
+  // Map API projects to frontend format
+  useEffect(() => {
+    if (apiProjects) {
+      const mappedProjects = apiProjects.map(mapApiProjectToProject);
+      setProjects(mappedProjects);
+    }
+  }, [apiProjects]);
+
   // Typing animation effect
   useEffect(() => {
     let i = 0;
@@ -63,6 +73,18 @@ const Index = () => {
         : [...prev, tag]
     );
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-red-400 mb-4">Error Loading Projects</h1>
+          <p className="text-gray-400 mb-4">Please make sure your backend server is running.</p>
+          <p className="text-sm text-gray-500">Expected API at: {process.env.VITE_API_URL || 'http://localhost:3001/api'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
@@ -148,17 +170,23 @@ const Index = () => {
           </div>
 
           {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project, index) => (
-              <ProjectCard 
-                key={project.id} 
-                project={project} 
-                index={index}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 text-lg">Loading projects...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProjects.map((project, index) => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
 
-          {filteredProjects.length === 0 && (
+          {!isLoading && filteredProjects.length === 0 && !error && (
             <div className="text-center py-12">
               <p className="text-gray-400 text-lg">No projects found matching your criteria.</p>
             </div>

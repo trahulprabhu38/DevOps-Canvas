@@ -1,17 +1,16 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useCreateProject } from '@/hooks/useProjects';
 
 const AddProject = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const createProjectMutation = useCreateProject();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -19,13 +18,13 @@ const AddProject = () => {
     detailedDescription: '',
     githubUrl: '',
     demoUrl: '',
+    mediumUrl: '',
     imageUrl: ''
   });
   
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState('');
   const [features, setFeatures] = useState<string[]>(['']);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -57,26 +56,20 @@ const AddProject = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    const filteredFeatures = features.filter(feature => feature.trim() !== '');
+    
+    const projectData = {
+      ...formData,
+      tags,
+      features: filteredFeatures,
+    };
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Project Added Successfully!",
-        description: "Your project has been added to the portfolio.",
-      });
-      
+      await createProjectMutation.mutateAsync(projectData);
       navigate('/');
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add project. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
+      console.error('Error creating project:', error);
     }
   };
 
@@ -167,7 +160,7 @@ const AddProject = () => {
             <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8">
               <h2 className="text-2xl font-semibold text-white mb-6">Links & Technologies</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="space-y-2">
                   <Label htmlFor="githubUrl" className="text-gray-300">GitHub URL</Label>
                   <Input
@@ -189,6 +182,18 @@ const AddProject = () => {
                     onChange={handleInputChange}
                     className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400"
                     placeholder="https://demo.example.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="mediumUrl" className="text-gray-300">Medium Article URL</Label>
+                  <Input
+                    id="mediumUrl"
+                    name="mediumUrl"
+                    value={formData.mediumUrl}
+                    onChange={handleInputChange}
+                    className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400"
+                    placeholder="https://medium.com/@username/article"
                   />
                 </div>
               </div>
@@ -260,10 +265,10 @@ const AddProject = () => {
             <div className="flex justify-center">
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={createProjectMutation.isPending}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg transition-all duration-300 transform hover:scale-105"
               >
-                {isSubmitting ? 'Adding Project...' : 'Add Project'}
+                {createProjectMutation.isPending ? 'Adding Project...' : 'Add Project'}
               </Button>
             </div>
           </form>

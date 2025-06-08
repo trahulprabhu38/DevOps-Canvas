@@ -1,18 +1,28 @@
 
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Github, ExternalLink, Star, GitBranch } from 'lucide-react';
+import { ArrowLeft, Github, ExternalLink, Star, GitBranch, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { mockProjects } from '@/data/mockData';
+import { useProject } from '@/hooks/useProjects';
+import { mapApiProjectToProject } from '@/utils/projectMapper';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const project = mockProjects.find(p => p.id === id);
+  const { data: apiProject, isLoading, error } = useProject(id!);
 
-  if (!project) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-400 text-lg">Loading project...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !apiProject) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -24,6 +34,8 @@ const ProjectDetail = () => {
       </div>
     );
   }
+
+  const project = mapApiProjectToProject(apiProject);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
@@ -73,6 +85,14 @@ const ProjectDetail = () => {
                       <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-2 h-4 w-4" />
                         Live Demo
+                      </a>
+                    </Button>
+                  )}
+                  {project.mediumUrl && (
+                    <Button asChild className="bg-green-600/80 hover:bg-green-700/80 backdrop-blur-sm">
+                      <a href={project.mediumUrl} target="_blank" rel="noopener noreferrer">
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Medium Article
                       </a>
                     </Button>
                   )}
