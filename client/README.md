@@ -71,3 +71,14 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Backend Setup (API)
+
+The backend will be located in `src/server` and will use Node.js, Express, and MongoDB.
+
+### To run the backend:
+1. Install dependencies: `cd src/server && npm install`
+2. Create a `.env` file with your MongoDB URI and other config.
+3. Start the server: `npm run dev` (for development with nodemon)
+
+API will be available at `http://localhost:3001/api` by default.

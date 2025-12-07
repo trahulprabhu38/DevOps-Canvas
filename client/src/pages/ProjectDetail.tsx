@@ -1,16 +1,32 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Github, ExternalLink, Star, GitBranch, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProject } from '@/hooks/useProjects';
-import { mapApiProjectToProject } from '@/utils/projectMapper';
+import ReactMarkdown from 'react-markdown';
+import Navbar from '@/components/Navbar';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: apiProject, isLoading, error } = useProject(id!);
+  const [readme, setReadme] = useState<string | null>(null);
+
+  const project = apiProject || null;
+
+  useEffect(() => {
+    if (project && project.githubUrl) {
+      const match = project.githubUrl.match(/github.com\/(.+?)\/(.+?)(?:$|\/|\.)/);
+      if (match) {
+        const owner = match[1];
+        const repo = match[2];
+        fetch(`https://raw.githubusercontent.com/${owner}/${repo}/main/README.md`)
+          .then(res => res.ok ? res.text() : '')
+          .then(text => setReadme(text));
+      }
+    }
+  }, [project?.githubUrl]);
 
   if (isLoading) {
     return (
@@ -22,7 +38,7 @@ const ProjectDetail = () => {
     );
   }
 
-  if (error || !apiProject) {
+  if (error || !project) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -35,10 +51,9 @@ const ProjectDetail = () => {
     );
   }
 
-  const project = mapApiProjectToProject(apiProject);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
+      <Navbar />
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -55,11 +70,13 @@ const ProjectDetail = () => {
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Hero Section */}
           <div className="relative rounded-2xl overflow-hidden">
-            <img
-              src={project.imageUrl}
-              alt={project.name}
-              className="w-full h-96 object-cover"
-            />
+            {project.imageUrl && (
+              <img
+                src={project.imageUrl}
+                alt={project.name}
+                className="w-full h-96 object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8">
               <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
@@ -195,16 +212,6 @@ const ProjectDetail = () => {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* README Section Placeholder */}
-          <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Documentation</h2>
-            <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-600/30">
-              <p className="text-gray-400 text-center italic">
-                GitHub README.md will be automatically fetched and displayed here in the full implementation.
-              </p>
             </div>
           </div>
         </div>

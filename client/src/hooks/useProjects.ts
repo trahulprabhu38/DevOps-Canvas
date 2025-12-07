@@ -1,19 +1,25 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService, ApiProject, CreateProjectRequest } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
+import { mapApiProjectToProject } from '@/utils/projectMapper';
 
 export const useProjects = () => {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: () => apiService.getProjects(),
+    queryFn: async () => {
+      const apiProjects = await apiService.getProjects();
+      return apiProjects.map(mapApiProjectToProject);
+    },
   });
 };
 
 export const useProject = (id: string) => {
   return useQuery({
     queryKey: ['project', id],
-    queryFn: () => apiService.getProject(id),
+    queryFn: async () => {
+      const apiProject = await apiService.getProject(id);
+      return mapApiProjectToProject(apiProject);
+    },
     enabled: !!id,
   });
 };

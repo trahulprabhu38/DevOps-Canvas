@@ -1,5 +1,4 @@
-
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export interface CreateProjectRequest {
   name: string;
@@ -11,6 +10,9 @@ export interface CreateProjectRequest {
   imageUrl: string;
   tags: string[];
   features: string[];
+  techStack: string[];
+  challenges: string[];
+  outcomes: string[];
 }
 
 export interface ApiProject {
@@ -29,6 +31,23 @@ export interface ApiProject {
   outcomes: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PdfNote {
+  _id: string;
+  title: string;
+  description?: string;
+  pdfUrl: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UploadPdfRequest {
+  title: string;
+  description?: string;
+  tags: string[];
+  pdfFile: File;
 }
 
 class ApiService {
@@ -76,6 +95,36 @@ class ApiService {
     return this.request<void>(`/projects/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  async getPdfNotes(): Promise<PdfNote[]> {
+    return this.request<PdfNote[]>('/pdf-notes');
+  }
+
+  async getPdfNote(id: string): Promise<PdfNote> {
+    return this.request<PdfNote>(`/pdf-notes/${id}`);
+  }
+
+  async uploadPdfNote(data: UploadPdfRequest): Promise<PdfNote> {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    if (data.description) {
+      formData.append('description', data.description);
+    }
+    formData.append('tags', JSON.stringify(data.tags));
+    formData.append('pdf', data.pdfFile);
+
+    const url = `${API_BASE_URL}/pdf-notes/upload`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }
 

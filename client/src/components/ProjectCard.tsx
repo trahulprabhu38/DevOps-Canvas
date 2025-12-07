@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Github, BookOpen } from 'lucide-react';
@@ -19,11 +18,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
     >
       {/* Project Image */}
       <div className="relative h-48 overflow-hidden">
-        <img
-          src={project.imageUrl}
-          alt={project.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        {project.imageUrl && (
+          <img
+            src={project.imageUrl}
+            alt={project.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
         
         {/* Hover Overlay */}
@@ -61,16 +62,28 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
-          <Button 
-            asChild 
-            variant="ghost" 
-            size="sm"
-            className="text-purple-400 hover:text-purple-300 hover:bg-purple-600/20 transition-all duration-200"
-          >
-            <Link to={`/project/${project.id}`}>
-              View Details
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              asChild 
+              variant="ghost" 
+              size="sm"
+              className="text-purple-400 hover:text-purple-300 hover:bg-purple-600/20 transition-all duration-200"
+            >
+              <Link to={`/project/${project.id}`}>
+                View Details
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-blue-400 hover:text-blue-300 hover:bg-blue-600/20 transition-all duration-200"
+            >
+              <Link to={`/edit-project/${project.id}`}>
+                Edit
+              </Link>
+            </Button>
+          </div>
           
           <div className="flex gap-2">
             {project.githubUrl && (

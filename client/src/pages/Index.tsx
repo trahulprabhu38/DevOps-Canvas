@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Github, ExternalLink, Filter } from 'lucide-react';
+import { Plus, Github, ExternalLink, Filter, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import ProjectCard from '@/components/ProjectCard';
 import { useProjects } from '@/hooks/useProjects';
 import { mapApiProjectToProject } from '@/utils/projectMapper';
 import { Project } from '@/data/mockData';
+import Navbar from '@/components/Navbar';
 
 const Index = () => {
   const { data: apiProjects, isLoading, error } = useProjects();
@@ -22,8 +23,7 @@ const Index = () => {
   // Map API projects to frontend format
   useEffect(() => {
     if (apiProjects) {
-      const mappedProjects = apiProjects.map(mapApiProjectToProject);
-      setProjects(mappedProjects);
+      setProjects(apiProjects);
     }
   }, [apiProjects]);
 
@@ -88,6 +88,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
+      <Navbar />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-3xl" />
@@ -95,7 +96,7 @@ const Index = () => {
           <div className="text-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent animate-fade-in">
-                Hi, I'm John Doe
+                Hi, I'm T Rahul Prabhu
               </h1>
               <p className="text-2xl md:text-3xl text-gray-300 font-light min-h-[2.5rem]">
                 {displayText}
@@ -108,14 +109,25 @@ const Index = () => {
               and building scalable solutions. Explore my projects and journey.
             </p>
             
-            <div className="flex gap-4 justify-center animate-fade-in">
+            <div className="flex gap-4 justify-center animate-fade-in flex-wrap">
               <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
                 <Link to="/add-project">
                   <Plus className="mr-2 h-5 w-5" />
                   Add Project
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="border-gray-600 text-gray-300 hover:bg-gray-800 transition-all duration-300">
+              <Button asChild size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
+                <Link to="/revision-notes">
+                  <FileText className="mr-2 h-5 w-5" />
+                  Revision Notes
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 transition-all duration-300"
+                onClick={() => window.open('https://github.com/trahulprabhu38', '_blank')}
+              >
                 <Github className="mr-2 h-5 w-5" />
                 View GitHub
               </Button>
@@ -176,12 +188,22 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map((project, index) => (
-                <ProjectCard 
-                  key={project.id} 
-                  project={project} 
-                  index={index}
-                />
+              {filteredProjects.filter(project => {
+                if (!project.id) {
+                  console.warn('Project with missing id:', project);
+                  return false;
+                }
+                return true;
+              }).map((project, index) => (
+                <div key={project.id}>
+                  <ProjectCard 
+                    project={project} 
+                    index={index}
+                  />
+                  <div className="text-lg font-semibold text-white text-center mt-2">
+                    {project.name}
+                  </div>
+                </div>
               ))}
             </div>
           )}

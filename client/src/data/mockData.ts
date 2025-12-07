@@ -12,7 +12,6 @@ export interface Project {
   techStack: string[];
   challenges: string[];
   outcomes: string[];
-  readmeContent?: string;
 }
 
 export const mockProjects: Project[] = [

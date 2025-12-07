@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useCreateProject } from '@/hooks/useProjects';
+import Navbar from '@/components/Navbar';
 
 const AddProject = () => {
   const navigate = useNavigate();
@@ -25,6 +26,10 @@ const AddProject = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState('');
   const [features, setFeatures] = useState<string[]>(['']);
+  const [techStack, setTechStack] = useState<string[]>([]);
+  const [currentTech, setCurrentTech] = useState('');
+  const [challenges, setChallenges] = useState<string[]>(['']);
+  const [outcomes, setOutcomes] = useState<string[]>(['']);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -54,6 +59,41 @@ const AddProject = () => {
     setFeatures(prev => prev.filter((_, i) => i !== index));
   };
 
+  const addTech = () => {
+    if (currentTech.trim() && !techStack.includes(currentTech.trim())) {
+      setTechStack(prev => [...prev, currentTech.trim()]);
+      setCurrentTech('');
+    }
+  };
+
+  const removeTech = (techToRemove: string) => {
+    setTechStack(prev => prev.filter(tech => tech !== techToRemove));
+  };
+
+  const addChallenge = () => {
+    setChallenges(prev => [...prev, '']);
+  };
+
+  const updateChallenge = (index: number, value: string) => {
+    setChallenges(prev => prev.map((challenge, i) => i === index ? value : challenge));
+  };
+
+  const removeChallenge = (index: number) => {
+    setChallenges(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addOutcome = () => {
+    setOutcomes(prev => [...prev, '']);
+  };
+
+  const updateOutcome = (index: number, value: string) => {
+    setOutcomes(prev => prev.map((outcome, i) => i === index ? value : outcome));
+  };
+
+  const removeOutcome = (index: number) => {
+    setOutcomes(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -63,6 +103,9 @@ const AddProject = () => {
       ...formData,
       tags,
       features: filteredFeatures,
+      techStack,
+      challenges: challenges.filter(c => c.trim() !== ''),
+      outcomes: outcomes.filter(o => o.trim() !== ''),
     };
 
     try {
@@ -75,6 +118,7 @@ const AddProject = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
+      <Navbar />
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -258,6 +302,108 @@ const AddProject = () => {
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Feature
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8">
+              <h2 className="text-2xl font-semibold text-white mb-6">Tech Stack</h2>
+              
+              <div className="space-y-4">
+                <Label className="text-gray-300">Tech Stack</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={currentTech}
+                    onChange={(e) => setCurrentTech(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTech())}
+                    className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 flex-1"
+                    placeholder="Add tech (e.g., React, Node.js)"
+                  />
+                  <Button type="button" onClick={addTech} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {techStack.map(tech => (
+                    <Badge key={tech} className="bg-gray-700 text-gray-300 flex items-center gap-1">
+                      {tech}
+                      <button type="button" onClick={() => removeTech(tech)}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8">
+              <h2 className="text-2xl font-semibold text-white mb-6">Technical Challenges</h2>
+              
+              <div className="space-y-4">
+                {challenges.map((challenge, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={challenge}
+                      onChange={(e) => updateChallenge(index, e.target.value)}
+                      className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 flex-1"
+                      placeholder="Describe a technical challenge"
+                    />
+                    {challenges.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        onClick={() => removeChallenge(index)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addChallenge}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700/50"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Challenge
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-8">
+              <h2 className="text-2xl font-semibold text-white mb-6">Outcomes & Impact</h2>
+              
+              <div className="space-y-4">
+                {outcomes.map((outcome, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={outcome}
+                      onChange={(e) => updateOutcome(index, e.target.value)}
+                      className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 flex-1"
+                      placeholder="Describe an outcome or impact"
+                    />
+                    {outcomes.length > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        onClick={() => removeOutcome(index)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addOutcome}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700/50"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Outcome
                 </Button>
               </div>
             </div>

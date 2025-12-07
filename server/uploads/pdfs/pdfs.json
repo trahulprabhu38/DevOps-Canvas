@@ -1,0 +1,9 @@
+[
+  {
+    "id": "1",
+    "title": "Example PDF - Getting Started",
+    "description": "This is an example PDF. Add your PDFs to this folder and edit this JSON file to add metadata.",
+    "filename": "./kustomize.pdf",
+    "tags": ["example", "tutorial"]
+  }
+]
