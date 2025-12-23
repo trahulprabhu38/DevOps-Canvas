@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://185.197.251.236/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export interface CreateProjectRequest {
   name: string;
