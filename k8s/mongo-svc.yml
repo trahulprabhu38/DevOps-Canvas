@@ -4,6 +4,7 @@ metadata:
   labels:
     app: mongo-svc
   name: mongo-svc
+  namespace: devops-canvas
 spec:
   ports:
   - name: 27018-27017

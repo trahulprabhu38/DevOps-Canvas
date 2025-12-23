@@ -4,6 +4,7 @@ metadata:
   labels:
     app: devops-canvas-svc
   name: devops-canvas-svc
+  namespace: devops-canvas
 spec:
   ports:
   - port: 80

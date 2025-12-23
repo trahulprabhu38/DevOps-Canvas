@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mongo-stateful
+  namespace: devops-canvas
 spec:
   replicas: 1
   selector:

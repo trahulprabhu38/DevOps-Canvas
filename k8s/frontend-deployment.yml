@@ -4,6 +4,7 @@ metadata:
   labels:
     app: devops-canvas-frontend
   name: devops-canvas-frontend
+  namespace: devops-canvas
 spec:
   replicas: 3
   strategy:
