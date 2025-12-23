@@ -21,7 +21,7 @@ spec:
         app: devops-canvas-backend
     spec:
       containers:
-      - image: trahulprabhu38/devops-canvas-backend:v6
+      - image: trahulprabhu38/devops-canvas-backend:v7
         name: devops-canvas-backend
         env:
             - name: MONGODB_URI
