@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: devops-canvas-backend
+  name: devops-canvas-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-canvas-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: devops-canvas-backend
+    spec:
+      containers:
+      - image: trahulprabhu38/devops-canvas-backend:v6
+        name: devops-canvas-backend
+        env:
+            - name: MONGODB_URI
+              value: "mongodb://mongo-svc:27017/canvas-db"
+            - name: UPLOADS_PATH
+              value: "/app/uploads/pdfs"
+        ports:
+        - containerPort: 3001
+        resources: {}
+      # imagePullSecrets:
+      #   - name: ghcr-secret
+status: {}

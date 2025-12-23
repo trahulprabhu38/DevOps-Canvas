@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-stateful
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: db
+      app: mongo
+  serviceName: mongo-svc
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        type: db
+        app: mongo
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongodb
+          image: mongo:8.2.2
+          ports:
+            - containerPort: 27017
+          resources: {}
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: ""
+
+

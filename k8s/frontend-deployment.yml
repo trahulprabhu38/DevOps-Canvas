@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: devops-canvas-frontend
+  name: devops-canvas-frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: devops-canvas-frontend-pod
+  template:
+    metadata:
+      labels:
+        app: devops-canvas-frontend-pod
+    spec:
+      containers:
+      - image: trahulprabhu38/devops-canvas-frontend:v7
+        ports:
+          - containerPort: 80
+        name: devops-canvas
+        resources: {}
+      # imagePullSecrets:
+      #   - name: ghcr-secret
+status: {}
+

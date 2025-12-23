@@ -1,31 +1,26 @@
-FROM node:latest as build
+# ---- Build Stage ----
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json .
-
-RUN npm install
-
-COPY  . .
-
-RUN npm run build 
-
-FROM node:latest as prod
-
-WORKDIR /app
-
-# Install only prod deps
 COPY package*.json ./
 RUN npm install
 
-COPY --from=build /app/dist/ ./dist
+COPY . .
+RUN npm run build
+
+# ---- Production Stage ----
+FROM node:20-alpine AS prod
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --only=production
+
+COPY --from=build /app/dist ./dist
+
+
 
 EXPOSE 3001
 
-CMD ["npm","start"]
-
-
-
-
-
-
+CMD ["node", "dist/index.js"]

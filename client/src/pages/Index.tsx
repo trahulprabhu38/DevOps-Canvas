@@ -80,7 +80,7 @@ const Index = () => {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-red-400 mb-4">Error Loading Projects</h1>
           <p className="text-gray-400 mb-4">Please make sure your backend server is running.</p>
-          <p className="text-sm text-gray-500">Expected API at: {process.env.VITE_API_URL || 'http://localhost:3001/api'}</p>
+          <p className="text-sm text-gray-500">Expected API at: {process.env.VITE_API_URL || 'http://185.197.251.236/api'}</p>
         </div>
       </div>
     );

@@ -81,4 +81,4 @@ The backend will be located in `src/server` and will use Node.js, Express, and M
 2. Create a `.env` file with your MongoDB URI and other config.
 3. Start the server: `npm run dev` (for development with nodemon)
 
-API will be available at `http://localhost:3001/api` by default.
+API will be available at `http://185.197.251.236/api` by default.

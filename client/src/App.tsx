@@ -9,6 +9,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import NotFound from "./pages/NotFound";
 import EditProject from './pages/EditProject';
 import RevisionNotes from './pages/RevisionNotes';
+import AddPDF from './pages/AddPDF';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/edit-project/:id" element={<EditProject />} />
           <Route path="/revision-notes" element={<RevisionNotes />} />
+          <Route path="/add-pdf" element={<AddPDF />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

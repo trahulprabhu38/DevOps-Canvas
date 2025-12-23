@@ -1,31 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search } from 'lucide-react';
+import { FileText, Search, Upload, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
+import { useToast } from '@/hooks/use-toast';
 
 interface PdfMetadata {
-  id: string;
+  _id: string;
   title: string;
   description: string;
-  filename: string;
-  tags: string[];
-}
-
-interface SelectedPdf extends PdfMetadata {
   pdfUrl: string;
+  tags: string[];
 }
 
 const RevisionNotes: React.FC = () => {
   const [pdfList, setPdfList] = useState<PdfMetadata[]>([]);
   const [filteredPdfs, setFilteredPdfs] = useState<PdfMetadata[]>([]);
-  const [selectedPdf, setSelectedPdf] = useState<SelectedPdf | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<PdfMetadata | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    description: '',
+    tags: '',
+    file: null as File | null
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
-    fetch('http://localhost:3001/uploads/pdfs/pdfs.json')
+    fetch('http://185.197.251.236/api/pdf-notes')
       .then(res => res.json())
       .then(data => {
         setPdfList(data);
@@ -67,10 +76,68 @@ const RevisionNotes: React.FC = () => {
   };
 
   const handlePdfClick = (pdf: PdfMetadata) => {
-    setSelectedPdf({
-      ...pdf,
-      pdfUrl: `http://localhost:3001/uploads/pdfs/${pdf.filename}`
-    });
+    setSelectedPdf(pdf);
+  };
+
+  const fetchPdfs = () => {
+    fetch('http://185.197.251.236/api/pdf-notes')
+      .then(res => res.json())
+      .then(data => {
+        setPdfList(data);
+        setFilteredPdfs(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch PDFs:', err);
+        setIsLoading(false);
+      });
+  };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadForm.file) {
+      toast({
+        title: "Error",
+        description: "Please select a PDF file",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('pdf', uploadForm.file);
+    formData.append('title', uploadForm.title);
+    formData.append('description', uploadForm.description);
+    formData.append('tags', JSON.stringify(uploadForm.tags.split(',').map(t => t.trim()).filter(Boolean)));
+
+    try {
+      const response = await fetch('http://185.197.251.236/api/pdf-notes/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      toast({
+        title: "Success!",
+        description: "PDF uploaded successfully"
+      });
+
+      setShowUploadModal(false);
+      setUploadForm({ title: '', description: '', tags: '', file: null });
+      fetchPdfs(); // Refresh the list
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to upload PDF",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -84,9 +151,16 @@ const RevisionNotes: React.FC = () => {
             <FileText className="inline-block h-12 w-12 mr-3 mb-2" />
             Revision Notes
           </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Your collection of study materials and revision notes. Add PDFs to <code className="bg-gray-800 px-2 py-1 rounded text-purple-300">/server/uploads/pdfs/</code> and edit <code className="bg-gray-800 px-2 py-1 rounded text-purple-300">pdfs.json</code> to add metadata.
+          <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-6">
+            Your collection of study materials and revision notes
           </p>
+          <Button
+            onClick={() => setShowUploadModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-lg"
+          >
+            <Upload className="h-5 w-5 mr-2" />
+            Upload PDF
+          </Button>
         </div>
 
         {/* Search and Filters */}
@@ -135,7 +209,7 @@ const RevisionNotes: React.FC = () => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredPdfs.map(pdf => (
                 <div
-                  key={pdf.id}
+                  key={pdf._id}
                   onClick={() => handlePdfClick(pdf)}
                   className="cursor-pointer bg-gray-800/80 border-2 border-purple-700 rounded-xl shadow-xl p-6 transition-all hover:scale-105 hover:border-purple-400 hover:shadow-purple-500/50 backdrop-blur-sm"
                 >
@@ -176,15 +250,15 @@ const RevisionNotes: React.FC = () => {
               <p className="text-slate-400 mb-4">
                 {searchTerm || selectedTags.length > 0
                   ? 'Try adjusting your search or filters'
-                  : 'Add your PDFs and edit pdfs.json to get started!'}
+                  : 'Just add PDFs to the uploads folder and restart the server!'}
               </p>
               {!searchTerm && selectedTags.length === 0 && (
                 <div className="max-w-md mx-auto mt-6 text-left bg-gray-900/50 p-4 rounded-lg">
                   <p className="text-sm text-slate-300 mb-2">To add PDFs:</p>
                   <ol className="text-sm text-slate-400 list-decimal list-inside space-y-1">
                     <li>Copy your PDF to <code className="bg-gray-800 px-1 rounded">/server/uploads/pdfs/</code></li>
-                    <li>Edit <code className="bg-gray-800 px-1 rounded">pdfs.json</code> in the same folder</li>
-                    <li>Add metadata: title, description, filename, tags</li>
+                    <li>Restart the server - PDFs are auto-imported!</li>
+                    <li>Refresh this page</li>
                   </ol>
                 </div>
               )}
@@ -192,6 +266,89 @@ const RevisionNotes: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-purple-700">
+            <div className="sticky top-0 bg-gray-900 border-b border-purple-700 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-purple-300 flex items-center">
+                <Upload className="h-6 w-6 mr-2" />
+                Upload PDF
+              </h2>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpload} className="p-6 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-slate-300 text-base">Title *</Label>
+                <Input
+                  required
+                  value={uploadForm.title}
+                  onChange={e => setUploadForm({ ...uploadForm, title: e.target.value })}
+                  className="bg-gray-800 border-purple-700 text-slate-100"
+                  placeholder="e.g. Kubernetes Guide"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-300 text-base">Description</Label>
+                <Textarea
+                  value={uploadForm.description}
+                  onChange={e => setUploadForm({ ...uploadForm, description: e.target.value })}
+                  rows={3}
+                  className="bg-gray-800 border-purple-700 text-slate-100"
+                  placeholder="Brief description of the content..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-300 text-base">Tags (comma-separated)</Label>
+                <Input
+                  value={uploadForm.tags}
+                  onChange={e => setUploadForm({ ...uploadForm, tags: e.target.value })}
+                  className="bg-gray-800 border-purple-700 text-slate-100"
+                  placeholder="e.g. kubernetes, docker, devops"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-300 text-base">PDF File *</Label>
+                <Input
+                  type="file"
+                  accept="application/pdf"
+                  required
+                  onChange={e => setUploadForm({ ...uploadForm, file: e.target.files?.[0] ?? null })}
+                  className="bg-gray-800 border-purple-700 text-slate-100 file:bg-purple-700 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:mr-4 hover:file:bg-purple-600"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="submit"
+                  disabled={uploading}
+                  className="flex-1 bg-purple-700 hover:bg-purple-600 text-lg py-6 rounded-xl transition-all"
+                >
+                  {uploading ? 'Uploading...' : 'Upload PDF'}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  variant="outline"
+                  className="px-6 border-purple-700 text-purple-300 hover:bg-purple-900/50"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* PDF Viewer Modal - Fullscreen */}
       {selectedPdf && (
@@ -226,7 +383,7 @@ const RevisionNotes: React.FC = () => {
           {/* PDF Container - Fullscreen */}
           <div className="w-full h-full">
             <iframe
-              src={selectedPdf.pdfUrl}
+              src={`http://185.197.251.236${selectedPdf.pdfUrl}`}
               className="w-full h-full border-0"
               title={selectedPdf.title}
             />
