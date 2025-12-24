@@ -21,7 +21,7 @@ spec:
         app: devops-canvas-frontend-pod
     spec:
       containers:
-      - image: trahulprabhu38/devops-canvas-frontend:v9
+      - image: trahulprabhu38/devops-canvas-frontend:v10
         ports:
           - containerPort: 80
         name: devops-canvas
