@@ -34,7 +34,7 @@ const RevisionNotes: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch('http://185.197.251.236/api/pdf-notes')
+    fetch('/api/pdf-notes')
       .then(res => res.json())
       .then(data => {
         setPdfList(data);
@@ -80,7 +80,7 @@ const RevisionNotes: React.FC = () => {
   };
 
   const fetchPdfs = () => {
-    fetch('http://185.197.251.236/api/pdf-notes')
+    fetch('/api/pdf-notes')
       .then(res => res.json())
       .then(data => {
         setPdfList(data);
@@ -112,7 +112,7 @@ const RevisionNotes: React.FC = () => {
     formData.append('tags', JSON.stringify(uploadForm.tags.split(',').map(t => t.trim()).filter(Boolean)));
 
     try {
-      const response = await fetch('http://185.197.251.236/api/pdf-notes/upload', {
+      const response = await fetch('/api/pdf-notes/upload', {
         method: 'POST',
         body: formData
       });
@@ -383,7 +383,7 @@ const RevisionNotes: React.FC = () => {
           {/* PDF Container - Fullscreen */}
           <div className="w-full h-full">
             <iframe
-              src={`http://185.197.251.236${selectedPdf.pdfUrl}`}
+              src={selectedPdf.pdfUrl}
               className="w-full h-full border-0"
               title={selectedPdf.title}
             />

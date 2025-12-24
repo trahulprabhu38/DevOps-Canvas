@@ -9,7 +9,7 @@ interface PdfViewerProps {
 const PdfViewer: React.FC<PdfViewerProps> = ({ pdfNote, onClose }) => {
   const pdfUrl = pdfNote.pdfUrl.startsWith('http')
     ? pdfNote.pdfUrl
-    : `http://185.197.251.236${pdfNote.pdfUrl}`;
+    : pdfNote.pdfUrl;
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
